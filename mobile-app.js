@@ -1,258 +1,432 @@
-// Mobile LifeSync App Controller
-class MobileLifeSyncApp {
+// Enhanced LifeSync App with Swipe Carousel
+class SwipeLifeSyncApp {
     constructor() {
-        this.currentView = 'home';
+        this.currentSlide = 0;
+        this.totalSlides = 8;
+        this.isAnimating = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.diffX = 0;
+        this.diffY = 0;
+        this.threshold = 50;
+        this.restraint = 100;
+        this.allowedTime = 300;
+        this.startTime = 0;
+        
         this.init();
     }
 
     init() {
         this.bindEvents();
         this.updateDateTime();
-        this.updateUpcomingEvent();
+        this.updateGreeting();
+        this.updateCalendarDate();
+        this.hideSwipeHint();
         
-        // Update date/time every minute
-        setInterval(() => this.updateDateTime(), 60000);
+        // Update time every minute
+        setInterval(() => {
+            this.updateDateTime();
+            this.updateGreeting();
+        }, 60000);
     }
 
     bindEvents() {
-        // Bottom navigation
-        this.bindBottomNavigation();
+        // Touch/swipe events
+        this.bindSwipeEvents();
         
-        // App tiles
-        this.bindAppTiles();
+        // Carousel indicators
+        this.bindIndicators();
         
-        // Add buttons
-        this.bindAddButtons();
+        // App circle clicks
+        this.bindAppCircles();
         
-        // Reminder toggles
-        this.bindReminderToggles();
+        // Back buttons
+        this.bindBackButtons();
+        
+        // Mood selector
+        this.bindMoodSelector();
     }
 
-    bindBottomNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
+    bindSwipeEvents() {
+        const carouselTrack = document.getElementById('carousel-track');
         
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const targetView = item.getAttribute('data-view');
-                this.switchView(targetView);
-                this.setActiveNavItem(item);
+        // Touch events
+        carouselTrack.addEventListener('touchstart', (e) => {
+            this.handleTouchStart(e);
+        }, { passive: true });
+        
+        carouselTrack.addEventListener('touchmove', (e) => {
+            this.handleTouchMove(e);
+        }, { passive: false });
+        
+        carouselTrack.addEventListener('touchend', (e) => {
+            this.handleTouchEnd(e);
+        }, { passive: true });
+
+        // Mouse events for desktop testing
+        carouselTrack.addEventListener('mousedown', (e) => {
+            this.handleMouseStart(e);
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            this.handleMouseMove(e);
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            this.handleMouseEnd(e);
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            this.handleKeyDown(e);
+        });
+    }
+
+    handleTouchStart(e) {
+        this.startX = e.touches[0].clientX;
+        this.startY = e.touches[0].clientY;
+        this.startTime = new Date().getTime();
+    }
+
+    handleTouchMove(e) {
+        if (!this.startX || !this.startY) return;
+        
+        this.diffX = e.touches[0].clientX - this.startX;
+        this.diffY = e.touches[0].clientY - this.startY;
+        
+        // Prevent vertical scrolling during horizontal swipe
+        if (Math.abs(this.diffX) > Math.abs(this.diffY)) {
+            e.preventDefault();
+        }
+    }
+
+    handleTouchEnd(e) {
+        if (!this.startX || !this.startY) return;
+        
+        const elapsedTime = new Date().getTime() - this.startTime;
+        
+        if (elapsedTime <= this.allowedTime) {
+            if (Math.abs(this.diffX) >= this.threshold && Math.abs(this.diffY) <= this.restraint) {
+                if (this.diffX > 0) {
+                    this.previousSlide();
+                } else {
+                    this.nextSlide();
+                }
+            }
+        }
+        
+        this.resetSwipe();
+    }
+
+    handleMouseStart(e) {
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        this.startTime = new Date().getTime();
+        this.isDragging = true;
+    }
+
+    handleMouseMove(e) {
+        if (!this.isDragging) return;
+        
+        this.diffX = e.clientX - this.startX;
+        this.diffY = e.clientY - this.startY;
+    }
+
+    handleMouseEnd(e) {
+        if (!this.isDragging) return;
+        
+        const elapsedTime = new Date().getTime() - this.startTime;
+        
+        if (elapsedTime <= this.allowedTime) {
+            if (Math.abs(this.diffX) >= this.threshold && Math.abs(this.diffY) <= this.restraint) {
+                if (this.diffX > 0) {
+                    this.previousSlide();
+                } else {
+                    this.nextSlide();
+                }
+            }
+        }
+        
+        this.isDragging = false;
+        this.resetSwipe();
+    }
+
+    handleKeyDown(e) {
+        if (e.key === 'ArrowLeft') {
+            this.previousSlide();
+        } else if (e.key === 'ArrowRight') {
+            this.nextSlide();
+        }
+    }
+
+    resetSwipe() {
+        this.startX = 0;
+        this.startY = 0;
+        this.diffX = 0;
+        this.diffY = 0;
+    }
+
+    nextSlide() {
+        if (this.isAnimating) return;
+        
+        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+        this.updateCarousel();
+        this.hideSwipeHint();
+    }
+
+    previousSlide() {
+        if (this.isAnimating) return;
+        
+        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+        this.updateCarousel();
+        this.hideSwipeHint();
+    }
+
+    goToSlide(slideIndex) {
+        if (this.isAnimating || slideIndex === this.currentSlide) return;
+        
+        this.currentSlide = slideIndex;
+        this.updateCarousel();
+        this.hideSwipeHint();
+    }
+
+    updateCarousel() {
+        this.isAnimating = true;
+        
+        const carouselTrack = document.getElementById('carousel-track');
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        
+        // Update transform
+        const translateX = -this.currentSlide * 100;
+        carouselTrack.style.transform = `translateX(${translateX}%)`;
+        
+        // Update active states
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active', index === this.currentSlide);
+        });
+        
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === this.currentSlide);
+        });
+        
+        // Reset animation flag
+        setTimeout(() => {
+            this.isAnimating = false;
+        }, 600);
+        
+        // Add haptic feedback if supported
+        if (navigator.vibrate) {
+            navigator.vibrate(10);
+        }
+    }
+
+    bindIndicators() {
+        const indicators = document.querySelectorAll('.indicator');
+        
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                this.goToSlide(index);
             });
         });
     }
 
-    bindAppTiles() {
-        const appTiles = document.querySelectorAll('.app-tile');
+    bindAppCircles() {
+        const appCircles = document.querySelectorAll('.app-circle');
         
-        appTiles.forEach(tile => {
-            tile.addEventListener('click', () => {
-                const appName = tile.getAttribute('data-app');
+        appCircles.forEach(circle => {
+            circle.addEventListener('click', () => {
+                const slide = circle.closest('.carousel-slide');
+                const appName = slide.getAttribute('data-app');
                 this.openApp(appName);
             });
         });
     }
 
-    bindAddButtons() {
-        const addReminderBtn = document.getElementById('add-reminder');
-        const addEntryBtn = document.getElementById('add-entry');
+    bindBackButtons() {
+        const backButtons = document.querySelectorAll('.back-btn');
         
-        if (addReminderBtn) {
-            addReminderBtn.addEventListener('click', () => {
-                this.addReminder();
-            });
-        }
-        
-        if (addEntryBtn) {
-            addEntryBtn.addEventListener('click', () => {
-                this.addJournalEntry();
-            });
-        }
-    }
-
-    bindReminderToggles() {
-        const reminderStatuses = document.querySelectorAll('.reminder-status');
-        
-        reminderStatuses.forEach(status => {
-            status.addEventListener('click', () => {
-                this.toggleReminder(status);
+        backButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.returnToCarousel();
             });
         });
     }
 
-    switchView(viewName) {
-        // Hide all views
-        const views = document.querySelectorAll('.view');
-        views.forEach(view => view.classList.remove('active'));
+    bindMoodSelector() {
+        const moodOptions = document.querySelectorAll('.mood-option');
         
-        // Show target view
-        const targetView = document.getElementById(`${viewName}-view`);
-        if (targetView) {
-            targetView.classList.add('active');
-            this.currentView = viewName;
-        }
-    }
-
-    setActiveNavItem(activeItem) {
-        // Remove active class from all nav items
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => item.classList.remove('active'));
-        
-        // Add active class to selected item
-        activeItem.classList.add('active');
+        moodOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove active from all
+                moodOptions.forEach(opt => opt.classList.remove('active'));
+                // Add active to clicked
+                option.classList.add('active');
+                
+                const mood = option.getAttribute('data-mood');
+                this.updateMood(mood);
+                this.showToast(`Mood updated to ${mood}! 😊`);
+            });
+        });
     }
 
     openApp(appName) {
-        // Map app tiles to views
-        const appViewMap = {
-            'weather': 'weather',
-            'reminders': 'reminders',
-            'fitness': 'fitness',
-            'journal': 'journal'
-        };
+        const carouselContainer = document.getElementById('carousel-container');
+        const appViews = document.getElementById('app-views');
+        const targetView = document.getElementById(`${appName}-view`);
         
-        const targetView = appViewMap[appName];
         if (targetView) {
-            this.switchView(targetView);
+            // Hide carousel
+            carouselContainer.style.display = 'none';
             
-            // Update bottom nav
-            const navItem = document.querySelector(`[data-view="${targetView}"]`);
-            if (navItem) {
-                this.setActiveNavItem(navItem);
+            // Show app views container
+            appViews.style.display = 'block';
+            
+            // Hide all views
+            const allViews = document.querySelectorAll('.app-view');
+            allViews.forEach(view => view.classList.remove('active'));
+            
+            // Show target view
+            targetView.classList.add('active');
+            
+            // Add haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([10, 50, 10]);
             }
+        }
+    }
+
+    returnToCarousel() {
+        const carouselContainer = document.getElementById('carousel-container');
+        const appViews = document.getElementById('app-views');
+        
+        // Hide app views
+        appViews.style.display = 'none';
+        
+        // Show carousel
+        carouselContainer.style.display = 'flex';
+        
+        // Add haptic feedback
+        if (navigator.vibrate) {
+            navigator.vibrate(10);
+        }
+    }
+
+    updateGreeting() {
+        const greetingTime = document.getElementById('greeting-time');
+        if (greetingTime) {
+            const hour = new Date().getHours();
+            let greeting = '';
+            
+            if (hour < 12) {
+                greeting = 'Good Morning';
+            } else if (hour < 17) {
+                greeting = 'Good Afternoon';
+            } else {
+                greeting = 'Good Evening';
+            }
+            
+            greetingTime.textContent = greeting;
         }
     }
 
     updateDateTime() {
-        const todayDate = document.getElementById('today-date');
-        if (todayDate) {
+        const headerDate = document.getElementById('header-date');
+        if (headerDate) {
             const now = new Date();
             const options = { 
-                weekday: 'long', 
-                month: 'long', 
+                weekday: 'short', 
+                month: 'short', 
                 day: 'numeric' 
             };
-            todayDate.textContent = now.toLocaleDateString('en-US', options);
+            headerDate.textContent = now.toLocaleDateString('en-US', options);
         }
     }
 
-    updateUpcomingEvent() {
-        const upcomingEvent = document.getElementById('upcoming-event');
-        if (upcomingEvent) {
-            const now = new Date();
-            const hour = now.getHours();
-            
-            let nextEvent = '';
-            if (hour < 7) {
-                nextEvent = 'Morning Workout at 7:00 AM';
-            } else if (hour < 12) {
-                nextEvent = 'Lunch Break at 12:30 PM';
-            } else if (hour < 18) {
-                nextEvent = 'Evening Walk at 6:00 PM';
-            } else {
-                nextEvent = 'Dinner Time at 7:00 PM';
-            }
-            
-            upcomingEvent.textContent = nextEvent;
+    updateCalendarDate() {
+        const calendarDateMini = document.getElementById('calendar-date-mini');
+        if (calendarDateMini) {
+            const today = new Date().getDate();
+            calendarDateMini.textContent = today;
         }
     }
 
-    addReminder() {
-        const reminderText = prompt('What would you like to be reminded about?');
-        if (reminderText) {
-            const time = prompt('What time? (e.g., 2:00 PM)');
-            if (time) {
-                this.createReminderItem(reminderText, time);
-                this.showToast('Reminder added successfully!');
-            }
-        }
-    }
-
-    createReminderItem(text, time) {
-        const remindersList = document.querySelector('.reminders-list');
-        const reminderItem = document.createElement('div');
-        reminderItem.className = 'reminder-item';
-        reminderItem.innerHTML = `
-            <div class="reminder-content">
-                <h4>${text}</h4>
-                <p>${time}</p>
-            </div>
-            <div class="reminder-status">○</div>
-        `;
+    updateMood(mood) {
+        const avatar = document.querySelector('.avatar-emoji');
+        const moodEmojis = {
+            amazing: '🥳',
+            happy: '😊',
+            good: '😌',
+            okay: '😐',
+            sad: '😔'
+        };
         
-        // Add event listener to the new reminder
-        const status = reminderItem.querySelector('.reminder-status');
-        status.addEventListener('click', () => {
-            this.toggleReminder(status);
-        });
-        
-        remindersList.appendChild(reminderItem);
-    }
-
-    toggleReminder(statusElement) {
-        if (statusElement.textContent === '○') {
-            statusElement.textContent = '●';
-            statusElement.style.color = '#22c55e';
-        } else {
-            statusElement.textContent = '○';
-            statusElement.style.color = '#000000';
+        if (avatar && moodEmojis[mood]) {
+            avatar.textContent = moodEmojis[mood];
         }
     }
 
-    addJournalEntry() {
-        const entryText = prompt('What\'s on your mind today?');
-        if (entryText) {
-            this.createJournalEntry(entryText);
-            this.showToast('Journal entry added!');
+    hideSwipeHint() {
+        const swipeHint = document.getElementById('swipe-hint');
+        if (swipeHint) {
+            setTimeout(() => {
+                swipeHint.style.opacity = '0';
+                swipeHint.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    swipeHint.style.display = 'none';
+                }, 300);
+            }, 3000);
         }
-    }
-
-    createJournalEntry(text) {
-        const journalEntries = document.querySelector('.journal-entries');
-        const entryItem = document.createElement('div');
-        entryItem.className = 'journal-entry';
-        entryItem.innerHTML = `
-            <div class="entry-date">Today</div>
-            <div class="entry-content">
-                <p>${text}</p>
-            </div>
-        `;
-        
-        journalEntries.insertBefore(entryItem, journalEntries.firstChild);
     }
 
     showToast(message) {
-        // Simple toast notification
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #000000;
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            z-index: 1000;
-        `;
-        toast.textContent = message;
+        const toast = document.getElementById('toast');
+        const toastMessage = toast.querySelector('.toast-message');
         
-        document.body.appendChild(toast);
+        toastMessage.textContent = message;
+        toast.classList.add('show');
         
         setTimeout(() => {
-            document.body.removeChild(toast);
+            toast.classList.remove('show');
         }, 2000);
+    }
+
+    // Auto-play functionality (optional)
+    startAutoPlay(interval = 5000) {
+        this.autoPlayInterval = setInterval(() => {
+            this.nextSlide();
+        }, interval);
+    }
+
+    stopAutoPlay() {
+        if (this.autoPlayInterval) {
+            clearInterval(this.autoPlayInterval);
+        }
     }
 }
 
-// Initialize the mobile app when DOM is loaded
+// Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.mobileLifeSyncApp = new MobileLifeSyncApp();
+    window.swipeLifeSyncApp = new SwipeLifeSyncApp();
 });
 
-// Handle device orientation changes
-window.addEventListener('orientationchange', () => {
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 100);
+// Handle visibility change to pause/resume auto-play
+document.addEventListener('visibilitychange', () => {
+    if (window.swipeLifeSyncApp) {
+        if (document.hidden) {
+            window.swipeLifeSyncApp.stopAutoPlay();
+        } else {
+            // window.swipeLifeSyncApp.startAutoPlay(); // Uncomment to enable auto-play
+        }
+    }
 });
+
+// Prevent zoom on double tap
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (event) => {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
