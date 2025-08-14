@@ -16,411 +16,344 @@
         <div class="floating-shape shape-2"></div>
         <div class="floating-shape shape-3"></div>
         <div class="floating-shape shape-4"></div>
+        <div class="floating-shape shape-5"></div>
     </div>
 
     <!-- Mobile App Container -->
     <div class="mobile-app">
         <!-- Header with Greeting -->
         <header class="app-header">
-            <div class="header-greeting">
-                <div class="greeting-time" id="greeting-time">Good Morning</div>
-                <h1 class="app-title">LifeSync <span class="sparkle">✨</span></h1>
-            </div>
-            <div class="profile-avatar" id="profile-avatar">
-                <div class="avatar-ring"></div>
-                <div class="avatar-emoji">😊</div>
+            <div class="header-content">
+                <div class="greeting-text">
+                    <span class="greeting-time" id="greeting-time">Good Morning</span>
+                    <h1 class="app-title">LifeSync <span class="sparkle">✨</span></h1>
+                </div>
+                <div class="profile-avatar" id="profile-avatar">
+                    <div class="avatar-ring"></div>
+                    <div class="avatar-emoji">😊</div>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="app-content" id="app-content">
+        <!-- Main Content - Carousel View -->
+        <main class="carousel-container" id="carousel-container">
+            
+            <!-- Main App Selection Carousel -->
+            <div class="app-carousel" id="app-carousel">
+                <div class="carousel-track" id="carousel-track">
+                    
+                    <!-- Home/Dashboard Icon -->
+                    <div class="carousel-slide active" data-app="home">
+                        <div class="app-circle home-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">🏠</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Dashboard</h3>
+                            <p>Your daily overview</p>
+                        </div>
+                    </div>
+
+                    <!-- Weather Icon -->
+                    <div class="carousel-slide" data-app="weather">
+                        <div class="app-circle weather-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">🌤️</div>
+                            <div class="weather-temp">23°</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Weather</h3>
+                            <p>Today's forecast</p>
+                        </div>
+                    </div>
+
+                    <!-- Tasks/Reminders Icon -->
+                    <div class="carousel-slide" data-app="tasks">
+                        <div class="app-circle tasks-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">✅</div>
+                            <div class="task-counter">5</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Tasks</h3>
+                            <p>5 pending items</p>
+                        </div>
+                    </div>
+
+                    <!-- Fitness Icon -->
+                    <div class="carousel-slide" data-app="fitness">
+                        <div class="app-circle fitness-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">💪</div>
+                            <div class="fitness-steps">7.2k</div>
+                            <div class="progress-ring">
+                                <svg width="120" height="120">
+                                    <circle cx="60" cy="60" r="55" stroke="rgba(255,255,255,0.3)" stroke-width="6" fill="none"/>
+                                    <circle cx="60" cy="60" r="55" stroke="#00d4aa" stroke-width="6" fill="none" 
+                                            stroke-dasharray="345" stroke-dashoffset="100" transform="rotate(-90 60 60)"/>
+                                </svg>
+                            </div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Fitness</h3>
+                            <p>7,200 steps today</p>
+                        </div>
+                    </div>
+
+                    <!-- Journal Icon -->
+                    <div class="carousel-slide" data-app="journal">
+                        <div class="app-circle journal-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">✨</div>
+                            <div class="journal-mood">😊</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Journal</h3>
+                            <p>Daily reflections</p>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Icon -->
+                    <div class="carousel-slide" data-app="calendar">
+                        <div class="app-circle calendar-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">📅</div>
+                            <div class="calendar-date" id="calendar-date-mini">15</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Calendar</h3>
+                            <p>Today's schedule</p>
+                        </div>
+                    </div>
+
+                    <!-- Diet Tracker Icon -->
+                    <div class="carousel-slide" data-app="diet">
+                        <div class="app-circle diet-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">🥗</div>
+                            <div class="calorie-count">1,245</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Diet Tracker</h3>
+                            <p>1,245 calories today</p>
+                        </div>
+                    </div>
+
+                    <!-- Entertainment Icon -->
+                    <div class="carousel-slide" data-app="entertainment">
+                        <div class="app-circle entertainment-circle">
+                            <div class="circle-bg"></div>
+                            <div class="circle-icon">🎬</div>
+                            <div class="circle-shimmer"></div>
+                        </div>
+                        <div class="app-info">
+                            <h3>Entertainment</h3>
+                            <p>Movies & shows</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators" id="carousel-indicators">
+                <div class="indicator active" data-slide="0"></div>
+                <div class="indicator" data-slide="1"></div>
+                <div class="indicator" data-slide="2"></div>
+                <div class="indicator" data-slide="3"></div>
+                <div class="indicator" data-slide="4"></div>
+                <div class="indicator" data-slide="5"></div>
+                <div class="indicator" data-slide="6"></div>
+                <div class="indicator" data-slide="7"></div>
+            </div>
+
+            <!-- Swipe Instruction -->
+            <div class="swipe-hint" id="swipe-hint">
+                <div class="swipe-icon">👈 Swipe 👉</div>
+                <p>Explore your apps</p>
+            </div>
+
+        </main>
+
+        <!-- App Content Views (Hidden by default) -->
+        <div class="app-views" id="app-views" style="display: none;">
+            
             <!-- Dashboard View -->
-            <div class="view active" id="home-view">
-                <!-- Mood Tracker Card -->
-                <div class="mood-card glass-card" id="mood-card">
-                    <div class="mood-header">
-                        <div class="mood-icon">
-                            <div class="heart-beat">💖</div>
-                        </div>
-                        <div class="mood-content">
-                            <h2>Daily Vibe Check</h2>
-                            <p>How are you feeling today?</p>
-                        </div>
-                    </div>
-                    <div class="mood-selector">
-                        <div class="mood-option" data-mood="amazing">🥳</div>
-                        <div class="mood-option" data-mood="happy">😊</div>
-                        <div class="mood-option active" data-mood="good">😌</div>
-                        <div class="mood-option" data-mood="okay">😐</div>
-                        <div class="mood-option" data-mood="sad">😔</div>
-                    </div>
-                    <div class="mood-meter">
-                        <div class="meter-track">
-                            <div class="meter-fill" style="width: 75%"></div>
-                        </div>
-                        <span class="mood-percentage">75% Positive</span>
-                    </div>
+            <div class="app-view" id="home-view">
+                <div class="view-header">
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Dashboard</h2>
+                    <div class="header-date" id="header-date"></div>
                 </div>
+                
+                <div class="dashboard-content">
+                    <!-- Quick Stats Cards -->
+                    <div class="quick-stats">
+                        <div class="stat-card glass-card">
+                            <div class="stat-icon">🌤️</div>
+                            <div class="stat-value">23°C</div>
+                            <div class="stat-label">Sunny</div>
+                        </div>
+                        <div class="stat-card glass-card">
+                            <div class="stat-icon">👟</div>
+                            <div class="stat-value">7.2k</div>
+                            <div class="stat-label">Steps</div>
+                        </div>
+                        <div class="stat-card glass-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Tasks</div>
+                        </div>
+                    </div>
 
-                <!-- Quick Stats -->
-                <div class="stats-row">
-                    <div class="stat-mini glass-card">
-                        <div class="stat-icon">🌤️</div>
-                        <div class="stat-value">23°</div>
-                        <div class="stat-label">Sunny</div>
-                    </div>
-                    <div class="stat-mini glass-card">
-                        <div class="stat-icon">👟</div>
-                        <div class="stat-value">7.2k</div>
-                        <div class="stat-label">Steps</div>
-                    </div>
-                    <div class="stat-mini glass-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-value">4/6</div>
-                        <div class="stat-label">Tasks</div>
-                    </div>
-                </div>
-
-                <!-- Upcoming Event -->
-                <div class="upcoming-card glass-card">
-                    <div class="upcoming-header">
+                    <!-- Upcoming Events -->
+                    <div class="upcoming-section glass-card">
                         <h3>Up Next</h3>
-                        <div class="pulse-dot"></div>
-                    </div>
-                    <div class="upcoming-event">
-                        <div class="event-time">
-                            <span class="time-value" id="next-event-time">2:30 PM</span>
-                            <span class="time-label">in 1 hour</span>
+                        <div class="upcoming-list">
+                            <div class="upcoming-item">
+                                <span class="time">2:30 PM</span>
+                                <span class="event">Team Meeting</span>
+                            </div>
+                            <div class="upcoming-item">
+                                <span class="time">6:00 PM</span>
+                                <span class="event">Gym Workout</span>
+                            </div>
                         </div>
-                        <div class="event-details">
-                            <h4 id="next-event-title">Team Standup</h4>
-                            <p id="next-event-desc">Weekly team sync meeting</p>
-                        </div>
                     </div>
-                </div>
 
-                <!-- App Grid -->
-                <div class="app-grid">
-                    <div class="app-tile weather-tile" data-app="weather">
-                        <div class="tile-bg"></div>
-                        <div class="app-icon">🌈</div>
-                        <span class="app-name">Weather</span>
-                        <div class="tile-shimmer"></div>
-                    </div>
-                    <div class="app-tile reminders-tile" data-app="reminders">
-                        <div class="tile-bg"></div>
-                        <div class="app-icon">📝</div>
-                        <span class="app-name">Tasks</span>
-                        <div class="notification-badge">3</div>
-                        <div class="tile-shimmer"></div>
-                    </div>
-                    <div class="app-tile fitness-tile" data-app="fitness">
-                        <div class="tile-bg"></div>
-                        <div class="app-icon">💪</div>
-                        <span class="app-name">Fitness</span>
-                        <div class="tile-shimmer"></div>
-                    </div>
-                    <div class="app-tile journal-tile" data-app="journal">
-                        <div class="tile-bg"></div>
-                        <div class="app-icon">✨</div>
-                        <span class="app-name">Journal</span>
-                        <div class="tile-shimmer"></div>
+                    <!-- Mood Tracker -->
+                    <div class="mood-section glass-card">
+                        <h3>Daily Mood</h3>
+                        <div class="mood-selector">
+                            <div class="mood-option" data-mood="amazing">🥳</div>
+                            <div class="mood-option" data-mood="happy">😊</div>
+                            <div class="mood-option active" data-mood="good">😌</div>
+                            <div class="mood-option" data-mood="okay">😐</div>
+                            <div class="mood-option" data-mood="sad">😔</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Weather View -->
-            <div class="view" id="weather-view">
+            <div class="app-view" id="weather-view">
                 <div class="view-header">
-                    <button class="back-btn" data-view="home">←</button>
-                    <h2>Weather Forecast</h2>
-                    <div class="weather-location">📍 New York</div>
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Weather</h2>
+                    <div class="location">📍 New York</div>
                 </div>
-                
-                <div class="weather-card glass-card">
-                    <div class="weather-current">
+                <div class="weather-content">
+                    <div class="weather-main glass-card">
                         <div class="weather-animation">
                             <div class="sun">☀️</div>
                             <div class="cloud cloud-1">☁️</div>
-                            <div class="cloud cloud-2">☁️</div>
                         </div>
-                        <div class="current-temp">
-                            <span class="temp-value">23°</span>
-                            <span class="temp-unit">C</span>
-                        </div>
-                        <div class="weather-desc">
-                            <h3>Partly Cloudy</h3>
-                            <p>Feels like 26°C</p>
-                        </div>
+                        <div class="current-temp">23°C</div>
+                        <div class="weather-desc">Partly Cloudy</div>
+                        <div class="feels-like">Feels like 26°C</div>
                     </div>
-                    
-                    <div class="weather-details">
-                        <div class="detail-item">
-                            <div class="detail-icon">💧</div>
-                            <div class="detail-info">
-                                <span class="detail-label">Humidity</span>
-                                <span class="detail-value">68%</span>
-                            </div>
+                    <div class="weather-details glass-card">
+                        <div class="detail-row">
+                            <span>Humidity</span>
+                            <span>68%</span>
                         </div>
-                        <div class="detail-item">
-                            <div class="detail-icon">💨</div>
-                            <div class="detail-info">
-                                <span class="detail-label">Wind</span>
-                                <span class="detail-value">12 km/h</span>
-                            </div>
+                        <div class="detail-row">
+                            <span>Wind</span>
+                            <span>12 km/h</span>
                         </div>
-                        <div class="detail-item">
-                            <div class="detail-icon">👁️</div>
-                            <div class="detail-info">
-                                <span class="detail-label">Visibility</span>
-                                <span class="detail-value">10 km</span>
-                            </div>
+                        <div class="detail-row">
+                            <span>Visibility</span>
+                            <span>10 km</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tasks View -->
-            <div class="view" id="reminders-view">
+            <!-- Other app views would continue here... -->
+            <div class="app-view coming-soon" id="tasks-view">
                 <div class="view-header">
-                    <button class="back-btn" data-view="home">←</button>
-                    <h2>My Tasks</h2>
-                    <button class="add-btn glass-btn" id="add-reminder">
-                        <span class="btn-icon">+</span>
-                    </button>
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Tasks</h2>
+                    <button class="add-btn">+</button>
                 </div>
-                
-                <div class="tasks-list">
-                    <div class="task-item glass-card" data-completed="false">
-                        <div class="task-checkbox">
-                            <div class="checkbox-mark">✓</div>
-                        </div>
-                        <div class="task-content">
-                            <h4>Morning Workout 💪</h4>
-                            <p>7:00 AM • Fitness</p>
-                        </div>
-                        <div class="task-priority high"></div>
-                    </div>
-                    
-                    <div class="task-item glass-card" data-completed="false">
-                        <div class="task-checkbox">
-                            <div class="checkbox-mark">✓</div>
-                        </div>
-                        <div class="task-content">
-                            <h4>Team Meeting 📅</h4>
-                            <p>2:30 PM • Work</p>
-                        </div>
-                        <div class="task-priority medium"></div>
-                    </div>
-                    
-                    <div class="task-item glass-card" data-completed="true">
-                        <div class="task-checkbox checked">
-                            <div class="checkbox-mark">✓</div>
-                        </div>
-                        <div class="task-content completed">
-                            <h4>Buy Groceries 🛒</h4>
-                            <p>Completed • Shopping</p>
-                        </div>
-                        <div class="task-priority low"></div>
-                    </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">✅</div>
+                    <h3>Tasks Manager</h3>
+                    <p>Coming Soon...</p>
                 </div>
             </div>
 
-            <!-- Fitness View -->
-            <div class="view" id="fitness-view">
+            <div class="app-view coming-soon" id="fitness-view">
                 <div class="view-header">
-                    <button class="back-btn" data-view="home">←</button>
-                    <h2>Fitness Tracker</h2>
-                    <div class="streak-badge">🔥 7 day streak</div>
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Fitness</h2>
                 </div>
-                
-                <div class="fitness-stats">
-                    <div class="fitness-card glass-card steps-card">
-                        <div class="fitness-icon">👟</div>
-                        <div class="fitness-value">7,234</div>
-                        <div class="fitness-label">Steps Today</div>
-                        <div class="progress-ring">
-                            <svg class="ring-svg" width="60" height="60">
-                                <circle cx="30" cy="30" r="25" stroke="#e6e6e6" stroke-width="4" fill="none"/>
-                                <circle cx="30" cy="30" r="25" stroke="url(#stepsGradient)" stroke-width="4" fill="none" 
-                                        stroke-dasharray="157" stroke-dashoffset="47" transform="rotate(-90 30 30)"/>
-                                <defs>
-                                    <linearGradient id="stepsGradient">
-                                        <stop offset="0%" stop-color="#ff6b9d"/>
-                                        <stop offset="100%" stop-color="#c44569"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
-                        <div class="progress-text">70%</div>
-                    </div>
-                    
-                    <div class="fitness-card glass-card calories-card">
-                        <div class="fitness-icon">🔥</div>
-                        <div class="fitness-value">420</div>
-                        <div class="fitness-label">Calories Burned</div>
-                        <div class="progress-ring">
-                            <svg class="ring-svg" width="60" height="60">
-                                <circle cx="30" cy="30" r="25" stroke="#e6e6e6" stroke-width="4" fill="none"/>
-                                <circle cx="30" cy="30" r="25" stroke="url(#caloriesGradient)" stroke-width="4" fill="none" 
-                                        stroke-dasharray="157" stroke-dashoffset="78" transform="rotate(-90 30 30)"/>
-                                <defs>
-                                    <linearGradient id="caloriesGradient">
-                                        <stop offset="0%" stop-color="#ffd93d"/>
-                                        <stop offset="100%" stop-color="#ff9f43"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
-                        <div class="progress-text">50%</div>
-                    </div>
-                    
-                    <div class="fitness-card glass-card distance-card">
-                        <div class="fitness-icon">🏃‍♂️</div>
-                        <div class="fitness-value">5.2</div>
-                        <div class="fitness-label">Km Distance</div>
-                        <div class="progress-ring">
-                            <svg class="ring-svg" width="60" height="60">
-                                <circle cx="30" cy="30" r="25" stroke="#e6e6e6" stroke-width="4" fill="none"/>
-                                <circle cx="30" cy="30" r="25" stroke="url(#distanceGradient)" stroke-width="4" fill="none" 
-                                        stroke-dasharray="157" stroke-dashoffset="31" transform="rotate(-90 30 30)"/>
-                                <defs>
-                                    <linearGradient id="distanceGradient">
-                                        <stop offset="0%" stop-color="#00d4aa"/>
-                                        <stop offset="100%" stop-color="#01a3a4"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                        </div>
-                        <div class="progress-text">80%</div>
-                    </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">💪</div>
+                    <h3>Fitness Tracker</h3>
+                    <p>Coming Soon...</p>
                 </div>
             </div>
 
-            <!-- Journal View -->
-            <div class="view" id="journal-view">
+            <div class="app-view coming-soon" id="journal-view">
                 <div class="view-header">
-                    <button class="back-btn" data-view="home">←</button>
-                    <h2>Daily Journal</h2>
-                    <button class="add-btn glass-btn" id="add-entry">
-                        <span class="btn-icon">✨</span>
-                    </button>
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Journal</h2>
                 </div>
-                
-                <div class="journal-entries">
-                    <div class="journal-entry glass-card">
-                        <div class="entry-header">
-                            <div class="entry-date">Today</div>
-                            <div class="entry-mood">😊</div>
-                        </div>
-                        <div class="entry-content">
-                            <p>Had an amazing morning workout! 💪 Feeling so energized and ready to tackle the day. The weather is perfect for a walk later. Grateful for this beautiful day! ✨</p>
-                        </div>
-                        <div class="entry-tags">
-                            <span class="tag">fitness</span>
-                            <span class="tag">gratitude</span>
-                            <span class="tag">energy</span>
-                        </div>
-                    </div>
-                    
-                    <div class="journal-entry glass-card">
-                        <div class="entry-header">
-                            <div class="entry-date">Yesterday</div>
-                            <div class="entry-mood">😌</div>
-                        </div>
-                        <div class="entry-content">
-                            <p>Productive day at work! Completed all my tasks and had a great team meeting. Looking forward to the weekend plans. 📅</p>
-                        </div>
-                        <div class="entry-tags">
-                            <span class="tag">work</span>
-                            <span class="tag">productivity</span>
-                        </div>
-                    </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">✨</div>
+                    <h3>Daily Journal</h3>
+                    <p>Coming Soon...</p>
                 </div>
             </div>
 
-            <!-- Calendar View -->
-            <div class="view" id="calendar-view">
+            <div class="app-view coming-soon" id="calendar-view">
                 <div class="view-header">
-                    <button class="back-btn" data-view="home">←</button>
+                    <button class="back-btn" id="back-to-carousel">←</button>
                     <h2>Calendar</h2>
-                    <div class="calendar-date" id="calendar-date"></div>
                 </div>
-                
-                <div class="calendar-today glass-card">
-                    <div class="today-header">
-                        <h3>Today's Schedule</h3>
-                        <div class="schedule-count">4 events</div>
-                    </div>
-                    <div class="today-events">
-                        <div class="event-item">
-                            <div class="event-time">
-                                <span class="time-dot active"></span>
-                                <span class="time-text">9:00 AM</span>
-                            </div>
-                            <div class="event-content">
-                                <h4>Morning Workout 💪</h4>
-                                <p>Gym Session • 1 hour</p>
-                            </div>
-                        </div>
-                        
-                        <div class="event-item upcoming">
-                            <div class="event-time">
-                                <span class="time-dot"></span>
-                                <span class="time-text">2:30 PM</span>
-                            </div>
-                            <div class="event-content">
-                                <h4>Team Meeting 📅</h4>
-                                <p>Weekly Standup • 30 min</p>
-                            </div>
-                        </div>
-                        
-                        <div class="event-item">
-                            <div class="event-time">
-                                <span class="time-dot"></span>
-                                <span class="time-text">6:00 PM</span>
-                            </div>
-                            <div class="event-content">
-                                <h4>Dinner with Friends 🍽️</h4>
-                                <p>Restaurant • 2 hours</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">📅</div>
+                    <h3>Calendar</h3>
+                    <p>Coming Soon...</p>
                 </div>
             </div>
-        </main>
 
-        <!-- Enhanced Bottom Navigation -->
-        <nav class="bottom-nav glass-nav">
-            <button class="nav-item active" data-view="home">
-                <div class="nav-ripple"></div>
-                <div class="nav-icon">🏠</div>
-                <span class="nav-label">Home</span>
-            </button>
-            <button class="nav-item" data-view="calendar">
-                <div class="nav-ripple"></div>
-                <div class="nav-icon">📅</div>
-                <span class="nav-label">Calendar</span>
-            </button>
-            <button class="nav-item" data-view="reminders">
-                <div class="nav-ripple"></div>
-                <div class="nav-icon">📝</div>
-                <span class="nav-label">Tasks</span>
-            </button>
-            <button class="nav-item" data-view="fitness">
-                <div class="nav-ripple"></div>
-                <div class="nav-icon">💪</div>
-                <span class="nav-label">Fitness</span>
-            </button>
-            <button class="nav-item" data-view="journal">
-                <div class="nav-ripple"></div>
-                <div class="nav-icon">✨</div>
-                <span class="nav-label">Journal</span>
-            </button>
-        </nav>
+            <div class="app-view coming-soon" id="diet-view">
+                <div class="view-header">
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Diet Tracker</h2>
+                </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">🥗</div>
+                    <h3>Diet Tracker</h3>
+                    <p>Coming Soon...</p>
+                </div>
+            </div>
+
+            <div class="app-view coming-soon" id="entertainment-view">
+                <div class="view-header">
+                    <button class="back-btn" id="back-to-carousel">←</button>
+                    <h2>Entertainment</h2>
+                </div>
+                <div class="coming-soon-content">
+                    <div class="coming-icon">🎬</div>
+                    <h3>Entertainment</h3>
+                    <p>Coming Soon...</p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Success Toast -->
+    <!-- Toast Notification -->
     <div class="toast" id="toast">
         <div class="toast-icon">✨</div>
         <div class="toast-message"></div>
