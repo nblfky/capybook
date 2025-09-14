@@ -75,9 +75,12 @@ async function findOfficialWebsite(storeName, localityHint = '') {
     if (serpKey) {
       const q = encodeURIComponent(`${storeName} official site ${localityHint || ''}`.trim());
       const url = `https://serpapi.com/search.json?engine=google&q=${q}&gl=sg&hl=en&num=10&api_key=${serpKey}`;
-      const res = await fetchWithTimeout(url, { timeoutMs: 6000 });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await (async () => {
+        try { const r = await fetchWithTimeout(url, { timeoutMs: 6000 }); if (r.ok) return await r.json(); } catch(_) {}
+        try { const r = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, { timeoutMs: 6000 }); if (r.ok) return JSON.parse(await r.text()); } catch(_) {}
+        return null;
+      })();
+      if (data) {
         const results = Array.isArray(data.organic_results) ? data.organic_results : [];
         if (results.length) {
           const official = results.find(r => r.displayed_link && !avoid.test(r.displayed_link));

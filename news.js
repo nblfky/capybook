@@ -21,14 +21,36 @@ async function fetchWithTimeout(url, { timeoutMs = 10000, headers = {} } = {}) {
   }
 }
 
+// Try direct fetch; on CORS failure, retry via public CORS proxies
+async function fetchJsonWithCors(url, { timeoutMs = 12000 } = {}) {
+  try {
+    const res = await fetchWithTimeout(url, { timeoutMs });
+    if (res.ok) return await res.json();
+  } catch (_) {}
+  const proxies = [
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u => `https://thingproxy.freeboard.io/fetch/${u}`,
+    u => `https://r.jina.ai/http://${u.replace(/^https?:\/\//, '')}`
+  ];
+  for (const wrap of proxies) {
+    try {
+      const proxied = wrap(url);
+      const res = await fetchWithTimeout(proxied, { timeoutMs });
+      if (!res.ok) continue;
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { /* not JSON */ }
+    } catch (_) {}
+  }
+  return null;
+}
+
 async function searchNews(query) {
   const q = encodeURIComponent(query);
   // Prefer SerpAPI Google News if available
   if (serpApiKey) {
     const url = `https://serpapi.com/search.json?engine=google_news&q=${q}&gl=sg&hl=en&when=7d&api_key=${serpApiKey}`;
-    const res = await fetchWithTimeout(url, { timeoutMs: 12000 });
-    if (res.ok) {
-      const data = await res.json();
+    const data = await fetchJsonWithCors(url, { timeoutMs: 12000 });
+    if (data) {
       const news = Array.isArray(data.news_results) ? data.news_results : [];
       // Normalize to CSE-like items for downstream code
       return news.map(n => ({ title: n.title, link: n.link, snippet: n.snippet || n.title, displayLink: new URL(n.link).hostname }));
@@ -37,9 +59,8 @@ async function searchNews(query) {
   // Fallback: Google CSE web search
   if (googleCseCx && googleApiKey) {
     const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${googleCseCx}&key=${googleApiKey}&num=10&gl=sg`;
-    const res = await fetchWithTimeout(url, { timeoutMs: 12000 });
-    if (res.ok) {
-      const data = await res.json();
+    const data = await fetchJsonWithCors(url, { timeoutMs: 12000 });
+    if (data) {
       return Array.isArray(data.items) ? data.items : [];
     }
   }
