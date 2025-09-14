@@ -3,10 +3,24 @@ import OpenAI from 'https://esm.sh/openai?bundle';
 const statusEl = document.getElementById('newsStatus');
 const tableBody = document.querySelector('#newsTable tbody');
 
-const openaiApiKey = localStorage.getItem('openaiApiKey') || '';
+let openaiApiKey = localStorage.getItem('openaiApiKey') || '';
 const googleCseCx = localStorage.getItem('googleCseCx') || '';
 const googleApiKey = localStorage.getItem('googleApiKey') || '';
 const serpApiKey = localStorage.getItem('serpApiKey') || '';
+
+// Prompt for OpenAI key if missing (same as scanner page)
+if (!openaiApiKey) {
+  setTimeout(() => {
+    if (confirm('Enter your OpenAI API key to enable AI news extraction?')) {
+      const key = prompt('OpenAI API key (sk-...)');
+      if (key) {
+        localStorage.setItem('openaiApiKey', key.trim());
+        openaiApiKey = key.trim();
+        location.reload();
+      }
+    }
+  }, 500);
+}
 
 function setStatus(msg) { statusEl.textContent = msg || ''; }
 
@@ -24,8 +38,11 @@ async function fetchWithTimeout(url, { timeoutMs = 10000, headers = {} } = {}) {
 // Try direct fetch; on CORS failure, retry via public CORS proxies
 async function fetchJsonWithCors(url, { timeoutMs = 12000 } = {}) {
   try {
-    const res = await fetchWithTimeout(url, { timeoutMs });
-    if (res.ok) return await res.json();
+    // SerpAPI blocks CORS; prefer proxy-first for those URLs
+    if (!/serpapi\.com/i.test(url)) {
+      const res = await fetchWithTimeout(url, { timeoutMs });
+      if (res.ok) return await res.json();
+    }
   } catch (_) {}
   const proxies = [
     u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
