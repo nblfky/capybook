@@ -90,8 +90,33 @@ function cleanHtml(html) {
   return el.textContent || el.innerText || '';
 }
 
+function ruleBasedExtract(items) {
+  const openRe = /(opens|opening|to open|launch(?:es|ing)?|debut|set to open)/i;
+  const closeRe = /(closes|closure|closing|to close|shutting down|shut(?:s)?|cease operations)/i;
+  return items
+    .map(it => {
+      const t = `${it.title || ''} ${it.snippet || ''}`;
+      let eventType = '';
+      if (openRe.test(t)) eventType = 'opening';
+      else if (closeRe.test(t)) eventType = 'closure';
+      if (!eventType) return null;
+      return {
+        eventType,
+        businessName: it.title?.split(':')[0] || '',
+        location: '',
+        headline: it.title || '',
+        date: '',
+        sourceUrl: it.link,
+        sourceOutlet: it.displayLink || (it.link ? new URL(it.link).hostname : ''),
+        confidence: 0.4
+      };
+    })
+    .filter(Boolean);
+}
+
 async function extractEventsFromSnippets(items) {
-  if (!openaiApiKey || !items.length) return [];
+  if (!items.length) return [];
+  if (!openaiApiKey) return ruleBasedExtract(items);
   const client = new OpenAI({ apiKey: openaiApiKey, dangerouslyAllowBrowser: true });
   const snippets = items.map(it => ({
     title: it.title,
@@ -138,13 +163,19 @@ async function extractEventsFromSnippets(items) {
   SNIPPET: ${s.snippet}
   `).join('\n')}`;
 
-  const resp = await client.responses.create({
-    model: 'gpt-4o-mini',
-    response_format: schema,
-    input: [{ role: 'user', content: prompt }]
-  });
-  const content = resp.output_text || '{}';
-  try { return JSON.parse(content).events || []; } catch { return []; }
+  try {
+    const resp = await client.responses.create({
+      model: 'gpt-4o-mini',
+      response_format: schema,
+      input: [{ role: 'user', content: prompt }]
+    });
+    const content = resp.output_text || '{}';
+    try { return JSON.parse(content).events || []; } catch { return ruleBasedExtract(items); }
+  } catch (e) {
+    // 401 or any failure → fallback
+    setStatus('OpenAI auth failed — falling back to keyword filter.');
+    return ruleBasedExtract(items);
+  }
 }
 
 function renderEvents(events) {
