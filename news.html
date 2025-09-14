@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>bnsVision News</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#00b14f">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <img src="grab_logo.png" alt="Grab logo">
+    <span>bnsVision – News</span>
+    <a href="index.html" style="position:absolute; right:16px; top:16px; background:rgba(255,255,255,0.2); padding:8px 12px; border-radius:8px; color:#fff; text-decoration:none; font-weight:600;">Scanner</a>
+  </header>
+  <main>
+    <div class="card">
+      <div class="toolbar">
+        <button id="refreshNewsBtn" class="btn">Refresh News</button>
+      </div>
+      <div id="newsStatus" class="muted"></div>
+      <div class="table-container">
+        <table id="newsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Headline</th>
+              <th>Event</th>
+              <th>Business</th>
+              <th>Location</th>
+              <th>Date</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="news.js"></script>
+</body>
+</html>
+
