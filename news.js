@@ -114,6 +114,24 @@ function ruleBasedExtract(items) {
     .filter(Boolean);
 }
 
+// Fetch readable article text using CORS-friendly readers
+async function fetchArticleText(url) {
+  const targets = [
+    u => `https://r.jina.ai/http://${u.replace(/^https?:\/\//, '')}`,
+    u => `https://r.jina.ai/https://${u.replace(/^https?:\/\//, '')}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`
+  ];
+  for (const wrap of targets) {
+    try {
+      const res = await fetchWithTimeout(wrap(url), { timeoutMs: 12000 });
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text && text.length > 200) return text;
+    } catch (_) {}
+  }
+  return '';
+}
+
 async function extractEventsFromSnippets(items) {
   if (!items.length) return [];
   if (!openaiApiKey) return ruleBasedExtract(items);
@@ -178,6 +196,95 @@ async function extractEventsFromSnippets(items) {
   }
 }
 
+// Higher-accuracy: fetch full article text and let AI decide per article
+function splitIntoBatches(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function ruleBasedFromArticle(text, meta) {
+  if (!text) return [];
+  const openingPhrases = /(grand opening|opens\s+(?:a|an|new)|opening\s+(?:of|this)|set to open|to open|launch(?:ing|es)?|debut(?:s)?)/i;
+  const closingPhrases = /(permanently closed|permanent closure|to close|closes|closing down|cease operations|shutting down)/i;
+  let eventType = '';
+  if (openingPhrases.test(text)) eventType = 'opening';
+  else if (closingPhrases.test(text)) eventType = 'closure';
+  if (!eventType) return [];
+  return [{
+    eventType,
+    businessName: meta.title || '',
+    location: '',
+    headline: meta.title || '',
+    date: '',
+    sourceUrl: meta.link,
+    sourceOutlet: meta.displayLink || (meta.link ? new URL(meta.link).hostname : ''),
+    confidence: 0.5
+  }];
+}
+
+async function extractEventsFromArticles(items) {
+  if (!items.length) return [];
+  const batches = splitIntoBatches(items.slice(0, 20), 4); // process up to 20 articles in batches of 4
+  const results = [];
+  for (const batch of batches) {
+    const texts = await Promise.all(batch.map(it => fetchArticleText(it.link)));
+    if (!openaiApiKey) {
+      batch.forEach((it, idx) => results.push(...ruleBasedFromArticle(texts[idx], it)));
+      continue;
+    }
+    // Build parallel AI calls per article
+    const client = new OpenAI({ apiKey: openaiApiKey, dangerouslyAllowBrowser: true });
+    const calls = batch.map((it, idx) => {
+      const article = texts[idx] || '';
+      const content = `Decide if the following news article reports a business opening or closure (Singapore focus). If not clearly about opening/closure, return an empty events array. Extract strictly as JSON.
+TITLE: ${it.title}
+URL: ${it.link}
+OUTLET: ${it.displayLink}
+ARTICLE:\n${article.slice(0, 15000)}`; // guard token size
+      const schema = {
+        type: 'json_schema',
+        json_schema: {
+          name: 'events_schema',
+          schema: {
+            type: 'object',
+            properties: {
+              events: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    eventType: { enum: ['opening','closure','reopening','relocation'] },
+                    businessName: { type: 'string' },
+                    location: { type: 'string' },
+                    headline: { type: 'string' },
+                    date: { type: 'string' },
+                    sourceUrl: { type: 'string' },
+                    sourceOutlet: { type: 'string' },
+                    confidence: { type: 'number' }
+                  },
+                  required: ['eventType','businessName','sourceUrl','sourceOutlet','confidence']
+                }
+              }
+            },
+            required: ['events']
+          }
+        }
+      };
+      return client.responses.create({ model: 'gpt-4o-mini', response_format: schema, input: [{ role: 'user', content }] })
+        .then(r => {
+          const txt = r.output_text || '{}';
+          try { return JSON.parse(txt).events || []; } catch { return []; }
+        })
+        .catch(() => ruleBasedFromArticle(article, it));
+    });
+    const batchEvents = await Promise.all(calls);
+    batchEvents.forEach(evArr => results.push(...evArr));
+  }
+  // Filter low-confidence and ensure opening/closure only
+  return results.filter(e => (e.eventType === 'opening' || e.eventType === 'closure') && (e.confidence == null || e.confidence >= 0.5));
+}
+
 function renderEvents(events) {
   tableBody.innerHTML = '';
   events.forEach((ev, idx) => {
@@ -202,7 +309,11 @@ async function refreshNews() {
     const items = await searchNews('site:todayonline.com OR site:straitstimes.com opening OR closure OR closes OR shutting down Singapore');
     if (!items.length) { setStatus('No results'); return; }
     setStatus('Extracting events…');
-    const events = await extractEventsFromSnippets(items);
+    // Try higher-accuracy per-article extraction first; fall back to snippets
+    let events = await extractEventsFromArticles(items);
+    if (!events.length) {
+      events = await extractEventsFromSnippets(items);
+    }
     renderEvents(events);
     setStatus(events.length ? `Found ${events.length} events` : 'No opening/closure headlines detected');
   } catch (e) {
