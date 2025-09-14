@@ -143,7 +143,20 @@ async function refreshNews() {
 
 document.getElementById('refreshNewsBtn').addEventListener('click', refreshNews);
 
-// Auto-load on open
-refreshNews();
+// Auto-load on open with soft prompt for keys if missing
+if (serpApiKey || (googleCseCx && googleApiKey)) {
+  refreshNews();
+} else {
+  setStatus('Set SerpAPI or Google CSE keys to enable news search.');
+  setTimeout(() => {
+    if (confirm('Enter your SerpAPI key to enable news search?')) {
+      const s = prompt('SerpAPI key');
+      if (s) {
+        localStorage.setItem('serpApiKey', s.trim());
+        location.reload();
+      }
+    }
+  }, 600);
+}
 
 

@@ -1188,6 +1188,16 @@ if (!openaiApiKey) {
 
 // OneMap API prompt removed
 
+// Prompt once for SerpAPI (or skip if using Google CSE fallback)
+if (!localStorage.getItem('serpApiKey') && !localStorage.getItem('googleApiKey')) {
+  setTimeout(() => {
+    if (confirm('Enter your SerpAPI key to enable website/news lookups?')) {
+      const serp = prompt('SerpAPI key (starts with your secret key)');
+      if (serp) localStorage.setItem('serpApiKey', serp.trim());
+    }
+  }, 1000);
+}
+
 function correctStoreName(name) {
   if (!name || !englishWords.length || typeof didYouMean !== 'function') return name;
 
