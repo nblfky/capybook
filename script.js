@@ -68,20 +68,43 @@ async function extractInfoVision(imageUrl) {
 // - googleApiKey: Google API key
 async function findOfficialWebsite(storeName, localityHint = '') {
   try {
+    if (!storeName) return null;
+    // 1) Prefer SerpAPI if key present
+    const serpKey = localStorage.getItem('serpApiKey');
+    const avoid = /facebook|instagram|tripadvisor|yelp|tiktok|grab|shopee|lazada|carousell|directory|map|google\./i;
+    if (serpKey) {
+      const q = encodeURIComponent(`${storeName} official site ${localityHint || ''}`.trim());
+      const url = `https://serpapi.com/search.json?engine=google&q=${q}&gl=sg&hl=en&num=10&api_key=${serpKey}`;
+      const res = await fetchWithTimeout(url, { timeoutMs: 6000 });
+      if (res.ok) {
+        const data = await res.json();
+        const results = Array.isArray(data.organic_results) ? data.organic_results : [];
+        if (results.length) {
+          const official = results.find(r => r.displayed_link && !avoid.test(r.displayed_link));
+          const candidate = official || results[0];
+          if (candidate && candidate.link) return candidate.link;
+        }
+      }
+    }
+
+    // 2) Fallback to Google CSE if configured
     const cx = localStorage.getItem('googleCseCx');
     const key = localStorage.getItem('googleApiKey');
-    if (!cx || !key || !storeName) return null;
-    const q = encodeURIComponent(`${storeName} official site ${localityHint || ''}`.trim());
-    const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${cx}&key=${key}`;
-    const res = await fetchWithTimeout(url, { timeoutMs: 5000 });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const items = Array.isArray(data.items) ? data.items : [];
-    if (!items.length) return null;
-    // Heuristics: prefer first item that looks like brand domain
-    const official = items.find(it => it.displayLink && !/facebook|instagram|tripadvisor|yelp|tiktok|grab|shopee|lazada|carousell|directory|map|google\./i.test(it.displayLink));
-    const candidate = official || items[0];
-    return candidate?.link || null;
+    if (cx && key) {
+      const q = encodeURIComponent(`${storeName} official site ${localityHint || ''}`.trim());
+      const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${cx}&key=${key}`;
+      const res = await fetchWithTimeout(url, { timeoutMs: 6000 });
+      if (res.ok) {
+        const data = await res.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        if (items.length) {
+          const official = items.find(it => it.displayLink && !avoid.test(it.displayLink));
+          const candidate = official || items[0];
+          if (candidate && candidate.link) return candidate.link;
+        }
+      }
+    }
+    return null;
   } catch (_) {
     return null;
   }

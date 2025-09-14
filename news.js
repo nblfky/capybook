@@ -6,6 +6,7 @@ const tableBody = document.querySelector('#newsTable tbody');
 const openaiApiKey = localStorage.getItem('openaiApiKey') || '';
 const googleCseCx = localStorage.getItem('googleCseCx') || '';
 const googleApiKey = localStorage.getItem('googleApiKey') || '';
+const serpApiKey = localStorage.getItem('serpApiKey') || '';
 
 function setStatus(msg) { statusEl.textContent = msg || ''; }
 
@@ -21,13 +22,28 @@ async function fetchWithTimeout(url, { timeoutMs = 10000, headers = {} } = {}) {
 }
 
 async function searchNews(query) {
-  if (!googleCseCx || !googleApiKey) return [];
   const q = encodeURIComponent(query);
-  const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${googleCseCx}&key=${googleApiKey}&num=10&gl=sg`; 
-  const res = await fetchWithTimeout(url, { timeoutMs: 12000 });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data.items) ? data.items : [];
+  // Prefer SerpAPI Google News if available
+  if (serpApiKey) {
+    const url = `https://serpapi.com/search.json?engine=google_news&q=${q}&gl=sg&hl=en&when=7d&api_key=${serpApiKey}`;
+    const res = await fetchWithTimeout(url, { timeoutMs: 12000 });
+    if (res.ok) {
+      const data = await res.json();
+      const news = Array.isArray(data.news_results) ? data.news_results : [];
+      // Normalize to CSE-like items for downstream code
+      return news.map(n => ({ title: n.title, link: n.link, snippet: n.snippet || n.title, displayLink: new URL(n.link).hostname }));
+    }
+  }
+  // Fallback: Google CSE web search
+  if (googleCseCx && googleApiKey) {
+    const url = `https://www.googleapis.com/customsearch/v1?q=${q}&cx=${googleCseCx}&key=${googleApiKey}&num=10&gl=sg`;
+    const res = await fetchWithTimeout(url, { timeoutMs: 12000 });
+    if (res.ok) {
+      const data = await res.json();
+      return Array.isArray(data.items) ? data.items : [];
+    }
+  }
+  return [];
 }
 
 function cleanHtml(html) {
